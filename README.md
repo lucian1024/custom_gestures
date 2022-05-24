@@ -1,2 +1,2 @@
 # custom_gestures
-Flutter custom gesture  recognizers.
+Flutter custom gesture recognizers.
