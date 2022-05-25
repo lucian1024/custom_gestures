@@ -111,6 +111,15 @@ class _MyHomePageState extends State<MyHomePage> {
                     ..onEnd = (details) { print("right onEnd");}
                     ..onCancel = () { print("right onCancel");};
                 }
+            ),
+            MultiScaleGestureRecognizer: GestureRecognizerFactoryWithHandlers<MultiScaleGestureRecognizer>(
+                    () => MultiScaleGestureRecognizer(),
+                    (MultiScaleGestureRecognizer instance) {
+                  instance
+                    ..onStart = () { print("multi scale onStart");}
+                    ..onUpdate = (details) { print("multi scale onUpdate");}
+                    ..onEnd = (details) { print("multi scale onEnd");};
+                }
             )
           },
           child: Container(

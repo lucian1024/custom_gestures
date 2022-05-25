@@ -6,3 +6,4 @@ export 'src/mono_direction_drag.dart'
         RightDragGestureRecognizer,
         UpwardDragGestureRecognizer,
         DownwardDragGestureRecognizer;
+export 'src/multi_scale.dart';
