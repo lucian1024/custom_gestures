@@ -2,11 +2,10 @@
 import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
-import 'package:vector_math/vector_math_64.dart';
 
 
-/// The possible states of a [MultiScaleGestureRecognizer].
-enum _MultiScaleState {
+/// The possible states of a [PinchScaleGestureRecognizer].
+enum _PinchScaleState {
   /// The recognizer is ready to start recognizing a gesture.
   ready,
 
@@ -19,57 +18,18 @@ enum _MultiScaleState {
   accepted,
 
   /// The sequence of pointer events seen thus far has been accepted
-  /// definitively as a scale gesture and the pointers established a focal point
-  /// and initial scale.
+  /// definitively as a scale gesture and the pointers established a
+  /// initial scale.
   started,
 }
 
-// /// Details for [GestureMultiScaleStartCallback].
-// class MultiScaleStartDetails {
-//   /// Creates details for [GestureMultiScaleStartCallback].
-//   ///
-//   /// The [focalPoint] argument must not be null.
-//   MultiScaleStartDetails({ this.focalPoint = Offset.zero, Offset? localFocalPoint, this.pointerCount = 0 })
-//       : localFocalPoint = localFocalPoint ?? focalPoint;
-//
-//   /// The initial focal point of the pointers in contact with the screen.
-//   ///
-//   /// Reported in global coordinates.
-//   ///
-//   /// See also:
-//   ///
-//   ///  * [localFocalPoint], which is the same value reported in local
-//   ///    coordinates.
-//   final Offset focalPoint;
-//
-//   /// The initial focal point of the pointers in contact with the screen.
-//   ///
-//   /// Reported in local coordinates. Defaults to [focalPoint] if not set in the
-//   /// constructor.
-//   ///
-//   /// See also:
-//   ///
-//   ///  * [focalPoint], which is the same value reported in global
-//   ///    coordinates.
-//   final Offset localFocalPoint;
-//
-//   /// The number of pointers being tracked by the gesture recognizer.
-//   ///
-//   /// Typically this is the number of fingers being used to pan the widget using the gesture
-//   /// recognizer.
-//   final int pointerCount;
-//
-//   @override
-//   String toString() => 'MultiScaleStartDetails(focalPoint: $focalPoint, localFocalPoint: $localFocalPoint, pointersCount: $pointerCount)';
-// }
-
-/// Details for [GestureMultiScaleUpdateCallback].
-class MultiScaleUpdateDetails {
-  /// Creates details for [GestureMultiScaleUpdateCallback].
+/// Details for [GesturePinchScaleUpdateCallback].
+class PinchScaleUpdateDetails {
+  /// Creates details for [GesturePinchScaleUpdateCallback].
   ///
   /// The [scale], [rotation] arguments must not be null.
   /// The [scale] argument must be greater than or equal to zero.
-  MultiScaleUpdateDetails({
+  PinchScaleUpdateDetails({
     this.scale = 1.0,
     this.rotation = 0.0,
   }) : assert(scale >= 0.0);
@@ -87,35 +47,35 @@ class MultiScaleUpdateDetails {
   final double rotation;
 
   @override
-  String toString() => 'MultiScaleUpdateDetails('
+  String toString() => 'PinchScaleUpdateDetails('
       'scale: $scale,'
       ' rotation: $rotation';
 }
 
-/// Details for [GestureMultiScaleEndCallback].
-class MultiScaleEndDetails {
-  /// Creates details for [GestureMultiScaleEndCallback].
+/// Details for [GesturePinchScaleEndCallback].
+class PinchScaleEndDetails {
+  /// Creates details for [GesturePinchScaleEndCallback].
   ///
   /// The [velocity] argument must not be null.
-  MultiScaleEndDetails({ this.velocity = Velocity.zero});
+  PinchScaleEndDetails({ this.velocity = Velocity.zero});
 
   /// The velocity of the last pointer to be lifted off of the screen.
   final Velocity velocity;
 
   @override
-  String toString() => 'MultiScaleEndDetails(velocity: $velocity';
+  String toString() => 'PinchScaleEndDetails(velocity: $velocity';
 }
 
 /// Signature for when the pointers in contact with the screen have established
-/// a focal point and initial scale of 1.0.
-typedef GestureMultiScaleStartCallback = void Function();
+/// a initial scale of 1.0.
+typedef GesturePinchScaleStartCallback = void Function();
 
 /// Signature for when the pointers in contact with the screen have indicated a
-/// new focal point and/or scale.
-typedef GestureMultiScaleUpdateCallback = void Function(MultiScaleUpdateDetails details);
+/// new scale.
+typedef GesturePinchScaleUpdateCallback = void Function(PinchScaleUpdateDetails details);
 
 /// Signature for when the pointers are no longer in contact with the screen.
-typedef GestureMultiScaleEndCallback = void Function(MultiScaleEndDetails details);
+typedef GesturePinchScaleEndCallback = void Function(PinchScaleEndDetails details);
 
 bool _isFlingGesture(Velocity velocity) {
   final double speedSquared = velocity.pixelsPerSecond.distanceSquared;
@@ -150,18 +110,18 @@ class _LineBetweenPointers {
 }
 
 
-/// Recognizes a scale gesture.
+/// Recognizes a scale gesture with double fingers.
 ///
-/// [MultiScaleGestureRecognizer] tracks the pointers in contact with the screen and
-/// calculates their focal point, indicated scale, and rotation. When a focal
-/// pointer is established, the recognizer calls [onStart]. As the focal point,
-/// scale, rotation change, the recognizer calls [onUpdate]. When the pointers
+/// [PinchScaleGestureRecognizer] tracks the pointers in contact with the screen and
+/// calculates their indicated scale, and rotation. When a scale
+/// is established, the recognizer calls [onStart]. As the scale,
+/// rotation change, the recognizer calls [onUpdate]. When the pointers
 /// are no longer in contact with the screen, the recognizer calls [onEnd].
-class MultiScaleGestureRecognizer extends OneSequenceGestureRecognizer {
+class PinchScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Create a gesture recognizer for interactions intended for scaling content.
   ///
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
-  MultiScaleGestureRecognizer({
+  PinchScaleGestureRecognizer({
     Object? debugOwner,
     Set<PointerDeviceKind>? supportedDevices,
     this.dragStartBehavior = DragStartBehavior.down,
@@ -192,8 +152,7 @@ class MultiScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   ///   which provides more information about the gesture arena.
   DragStartBehavior dragStartBehavior;
 
-  /// The pointers in contact with the screen have established a focal point and
-  /// initial scale of 1.0.
+  /// The pointers in contact with the screen have established a initial scale of 1.0.
   ///
   /// This won't be called until the gesture arena has determined that this
   /// GestureRecognizer has won the gesture.
@@ -202,16 +161,15 @@ class MultiScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// * https://flutter.dev/docs/development/ui/advanced/gestures#gesture-disambiguation,
   ///   which provides more information about the gesture arena.
-  GestureMultiScaleStartCallback? onStart;
+  GesturePinchScaleStartCallback? onStart;
 
-  /// The pointers in contact with the screen have indicated a new focal point
-  /// and/or scale.
-  GestureMultiScaleUpdateCallback? onUpdate;
+  /// The pointers in contact with the screen have indicated a scale.
+  GesturePinchScaleUpdateCallback? onUpdate;
 
   /// The pointers are no longer in contact with the screen.
-  GestureMultiScaleEndCallback? onEnd;
+  GesturePinchScaleEndCallback? onEnd;
 
-  _MultiScaleState _state = _MultiScaleState.ready;
+  _PinchScaleState _state = _PinchScaleState.ready;
 
   _LineBetweenPointers? _initialLine;
   _LineBetweenPointers? _currentLine;
@@ -251,8 +209,8 @@ class MultiScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   void addAllowedPointer(PointerDownEvent event) {
     super.addAllowedPointer(event);
     _velocityTrackers[event.pointer] = VelocityTracker.withKind(event.kind);
-    if (_state == _MultiScaleState.ready) {
-      _state = _MultiScaleState.possible;
+    if (_state == _PinchScaleState.ready) {
+      _state = _PinchScaleState.possible;
       _pointerLocations = <int, Offset>{};
       _initialPointerLocations = <int, Offset>{};
       _pointerQueue = <int>[];
@@ -261,7 +219,7 @@ class MultiScaleGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void handleEvent(PointerEvent event) {
-    assert(_state != _MultiScaleState.ready);
+    assert(_state != _PinchScaleState.ready);
     bool didChangeConfiguration = false;
     bool shouldStartIfAccepted = false;
     if (event is PointerMoveEvent) {
@@ -320,7 +278,7 @@ class MultiScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   bool _reconfigure(int pointer) {
-    if (_state == _MultiScaleState.started) {
+    if (_state == _PinchScaleState.started) {
       if (onEnd != null) {
         final VelocityTracker tracker = _velocityTrackers[pointer]!;
 
@@ -330,23 +288,23 @@ class MultiScaleGestureRecognizer extends OneSequenceGestureRecognizer {
           if (pixelsPerSecond.distanceSquared > kMaxFlingVelocity * kMaxFlingVelocity) {
             velocity = Velocity(pixelsPerSecond: (pixelsPerSecond / pixelsPerSecond.distance) * kMaxFlingVelocity);
           }
-          invokeCallback<void>('onEnd', () => onEnd!(MultiScaleEndDetails(velocity: velocity)));
+          invokeCallback<void>('onEnd', () => onEnd!(PinchScaleEndDetails(velocity: velocity)));
         } else {
-          invokeCallback<void>('onEnd', () => onEnd!(MultiScaleEndDetails()));
+          invokeCallback<void>('onEnd', () => onEnd!(PinchScaleEndDetails()));
         }
       }
-      _state = _MultiScaleState.accepted;
+      _state = _PinchScaleState.accepted;
       return false;
     }
     return true;
   }
 
   void _advanceStateMachine(bool shouldStartIfAccepted, PointerDeviceKind pointerDeviceKind) {
-    if (_state == _MultiScaleState.ready) {
-      _state = _MultiScaleState.possible;
+    if (_state == _PinchScaleState.ready) {
+      _state = _PinchScaleState.possible;
     }
 
-    if (_state == _MultiScaleState.possible) {
+    if (_state == _PinchScaleState.possible) {
       final firstPointDelta = _pointerLocations[_pointerQueue[0]]! - _initialPointerLocations[_pointerQueue[0]]!;
       final secondPointDelta = _pointerLocations[_pointerQueue[1]]! - _initialPointerLocations[_pointerQueue[1]]!;
 
@@ -355,18 +313,18 @@ class MultiScaleGestureRecognizer extends OneSequenceGestureRecognizer {
           || (firstPointDelta.dy.sign != secondPointDelta.dy.sign
               && (firstPointDelta.dy.abs() + secondPointDelta.dy.abs()) > computeScaleSlop(pointerDeviceKind))) {
         resolve(GestureDisposition.accepted);
-        _state = _MultiScaleState.accepted;
+        _state = _PinchScaleState.accepted;
       }
     }
 
-    if (_state == _MultiScaleState.accepted && shouldStartIfAccepted) {
-      _state = _MultiScaleState.started;
+    if (_state == _PinchScaleState.accepted && shouldStartIfAccepted) {
+      _state = _PinchScaleState.started;
       _dispatchOnStartCallbackIfNeeded();
     }
 
-    if (_state == _MultiScaleState.started && onUpdate != null) {
+    if (_state == _PinchScaleState.started && onUpdate != null) {
       invokeCallback<void>('onUpdate', () {
-        onUpdate!(MultiScaleUpdateDetails(
+        onUpdate!(PinchScaleUpdateDetails(
           scale: _scaleFactor,
           rotation: _computeRotationFactor(),
         ));
@@ -375,7 +333,7 @@ class MultiScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   void _dispatchOnStartCallbackIfNeeded() {
-    assert(_state == _MultiScaleState.started);
+    assert(_state == _PinchScaleState.started);
     if (onStart != null) {
       invokeCallback<void>('onStart', () {
         onStart!();
@@ -394,19 +352,19 @@ class MultiScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   @override
   void didStopTrackingLastPointer(int pointer) {
     switch (_state) {
-      case _MultiScaleState.possible:
+      case _PinchScaleState.possible:
         resolve(GestureDisposition.rejected);
         break;
-      case _MultiScaleState.ready:
+      case _PinchScaleState.ready:
         assert(false); // We should have not seen a pointer yet
         break;
-      case _MultiScaleState.accepted:
+      case _PinchScaleState.accepted:
         break;
-      case _MultiScaleState.started:
+      case _PinchScaleState.started:
         assert(false); // We should be in the accepted state when user is done
         break;
     }
-    _state = _MultiScaleState.ready;
+    _state = _PinchScaleState.ready;
   }
 
   @override

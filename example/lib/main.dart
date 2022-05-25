@@ -112,12 +112,12 @@ class _MyHomePageState extends State<MyHomePage> {
                     ..onCancel = () { print("right onCancel");};
                 }
             ),
-            MultiScaleGestureRecognizer: GestureRecognizerFactoryWithHandlers<MultiScaleGestureRecognizer>(
-                    () => MultiScaleGestureRecognizer(),
-                    (MultiScaleGestureRecognizer instance) {
+            PinchScaleGestureRecognizer: GestureRecognizerFactoryWithHandlers<PinchScaleGestureRecognizer>(
+                    () => PinchScaleGestureRecognizer(),
+                    (PinchScaleGestureRecognizer instance) {
                   instance
                     ..onStart = () { print("multi scale onStart");}
-                    ..onUpdate = (details) { print("multi scale onUpdate");}
+                    ..onUpdate = (details) { print("multi scale onUpdate scale=${details.scale}");}
                     ..onEnd = (details) { print("multi scale onEnd");};
                 }
             )
